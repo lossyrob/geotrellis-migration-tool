@@ -10,6 +10,8 @@ import org.apache.avro.Schema
 import spray.json._
 import DefaultJsonProtocol._
 
+import scala.util.{Failure, Success, Try}
+
 package object core {
   // ugly keyIndex build function for in-built types
   def keyIndexBuild(keyBounds: JsObject, args: TransformArgs): JsValue = {
@@ -34,7 +36,7 @@ package object core {
         .getFields("keyBounds", "schema", "metadata", "header", "keyIndex") match {
            case Seq(kb, sc, md, he, ki) => {
              (kb.convertTo[JsObject],
-             sc.convertTo[JsObject],
+             Try { sc.convertTo[JsObject] },
              md.convertTo[JsObject],
              he.convertTo[JsObject],
              ki.convertTo[JsObject])
@@ -53,6 +55,9 @@ package object core {
 
     val newKeyIndex = keyIndexBuild(keyBounds, args).convertTo[K]
 
-    (newHeader, newMetadata, newKeyIndex, schema.convertTo[Schema])
+    (newHeader, newMetadata, newKeyIndex, schema match {
+      case Success(s) => s.convertTo[Schema]
+      case Failure(e) => null: Schema
+    })
   }
 }

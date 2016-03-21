@@ -4,6 +4,7 @@ import geotrellis.migration.core.{AttributeStoreTools, TransformArgs}
 import geotrellis.spark._
 import geotrellis.spark.io.file.{FileAttributeStore, FileLayerHeader}
 import geotrellis.spark.io.file.FileAttributeStore._
+
 import org.apache.commons.io.filefilter.WildcardFileFilter
 import spray.json._
 import java.io.FileFilter

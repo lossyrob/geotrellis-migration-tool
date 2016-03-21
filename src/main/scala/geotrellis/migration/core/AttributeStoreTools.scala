@@ -2,11 +2,14 @@ package geotrellis.migration.core
 
 import geotrellis.spark._
 import geotrellis.spark.io._
+import geotrellis.spark.io.index.KeyIndex
+import geotrellis.raster.{MultibandTile, Tile}
+import geotrellis.spark.io.avro.AvroRecordCodec
+import geotrellis.spark.io.avro.codecs.KeyValueRecordCodec
+
 import org.apache.avro.Schema
 import spray.json._
 import DefaultJsonProtocol._
-import geotrellis.spark.io.accumulo.AccumuloLayerHeader
-import geotrellis.spark.io.index.KeyIndex
 
 import scala.reflect.ClassTag
 
@@ -27,11 +30,17 @@ trait AttributeStoreTools {
       .toList
   }
 
-  def move[H: JsonFormat, K: SpatialComponent: JsonFormat: ClassTag](layerName: String, args: TransformArgs): Unit = {
+  def move[H: JsonFormat, K: SpatialComponent: JsonFormat: AvroRecordCodec: ClassTag](layerName: String, args: TransformArgs): Unit = {
     loadUpdatedMetadata[H, TileLayerMetadata[K], KeyIndex[K]](layerName, args).foreach {
       case (id, (header, metadata, keyIndex, schema)) =>
         delete(id, None)
-        attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, schema)
+        if(schema != null) attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, schema)
+        else {
+          if(args.tileType == "multiband")
+            attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, KeyValueRecordCodec[K, MultibandTile].schema)
+          else
+            attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, KeyValueRecordCodec[K, Tile].schema)
+        }
     }
   }
 
