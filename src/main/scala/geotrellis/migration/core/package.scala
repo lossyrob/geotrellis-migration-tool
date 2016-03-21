@@ -27,14 +27,9 @@ package object core {
   }
 
   def metadataTransfrom[H: JsonFormat, M: JsonFormat, K: JsonFormat](old: JsValue, args: TransformArgs): (H, M, K, Schema) = {
-    val oldJsArr = old.convertTo[JsArray]
-    val oldArr = oldJsArr.elements
-    // name and zoom
-    val nz = oldArr(0).convertTo[JsObject]
-
     // layer metadata
     val (keyBounds, schema, metadata, header, keyIndex) =
-      oldArr(1)
+      old
         .convertTo[JsObject]
         .getFields("keyBounds", "schema", "metadata", "header", "keyIndex") match {
            case Seq(kb, sc, md, he, ki) => {
@@ -57,8 +52,6 @@ package object core {
         .convertTo[M]
 
     val newKeyIndex = keyIndexBuild(keyBounds, args).convertTo[K]
-
-    println(nz)
 
     (newHeader, newMetadata, newKeyIndex, schema.convertTo[Schema])
   }

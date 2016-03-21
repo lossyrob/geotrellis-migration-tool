@@ -1,12 +1,12 @@
 package geotrellis.migration.core.backend
 
+import geotrellis.migration.core.{AttributeStoreTools, TransformArgs}
 import geotrellis.spark._
 import geotrellis.spark.io._
 import geotrellis.spark.io.s3._
 import geotrellis.spark.io.s3.S3AttributeStore._
 
 import com.amazonaws.services.s3.model.AmazonS3Exception
-import geotrellis.migration.core.AttributeStoreTools
 import spray.json._
 import DefaultJsonProtocol._
 
@@ -40,7 +40,6 @@ class S3Tools(val attributeStore: S3AttributeStore) extends AttributeStoreTools 
       case _                      => attributeStore.path(attributeStore.prefix, "_attributes", ".json")
     }
 
-
     attributeStore.s3Client
       .listObjectsIterator(attributeStore.bucket, path)
       .map{ os =>
@@ -54,4 +53,6 @@ class S3Tools(val attributeStore: S3AttributeStore) extends AttributeStoreTools 
       }
       .toList
   }
+
+  def layerMove(layerName: String, args: TransformArgs): Unit = genericLayerMove[S3LayerHeader](layerName, args)
 }

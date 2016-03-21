@@ -17,7 +17,8 @@ trait AttributeStoreTools {
 
   def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): List[(Option[LayerId], T)]
 
-  def delete(layerId: LayerId, attributeName: Option[String]): Unit = {}
+  def delete(layerId: LayerId, attributeName: Option[String]): Unit =
+    attributeName.fold(attributeStore.delete(layerId))(attributeStore.delete(layerId, _))
 
   def loadUpdatedMetadata[H: JsonFormat, M: JsonFormat, K: JsonFormat](layerName: String, args: TransformArgs): List[(LayerId, (H, M, K, Schema))] = {
     layerIds
@@ -26,17 +27,19 @@ trait AttributeStoreTools {
       .toList
   }
 
-  def move[K: SpatialComponent: JsonFormat: ClassTag](layerName: String, args: TransformArgs): Unit = {
-    loadUpdatedMetadata[AccumuloLayerHeader, TileLayerMetadata[K], KeyIndex[K]](layerName, args).foreach {
+  def move[H: JsonFormat, K: SpatialComponent: JsonFormat: ClassTag](layerName: String, args: TransformArgs): Unit = {
+    loadUpdatedMetadata[H, TileLayerMetadata[K], KeyIndex[K]](layerName, args).foreach {
       case (id, (header, metadata, keyIndex, schema)) =>
         delete(id, None)
         attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, schema)
     }
   }
 
-  def genericMove(layerName: String, args: TransformArgs): Unit =
+  def genericLayerMove[H: JsonFormat](layerName: String, args: TransformArgs): Unit =
     args
       .copy(format = this.format)
       .temporalResolution
-      .fold(move[SpatialKey](layerName, args))(_ => move[SpaceTimeKey](layerName, args))
+      .fold(move[H, SpatialKey](layerName, args))(_ => move[H, SpaceTimeKey](layerName, args))
+
+  def layerMove(layerName: String, args: TransformArgs): Unit
 }

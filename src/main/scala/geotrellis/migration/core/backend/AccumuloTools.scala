@@ -1,6 +1,6 @@
 package geotrellis.migration.core.backend
 
-import geotrellis.migration.core.AttributeStoreTools
+import geotrellis.migration.core.{AttributeStoreTools, TransformArgs}
 import geotrellis.spark._
 import geotrellis.spark.io._
 import geotrellis.spark.io.accumulo._
@@ -49,7 +49,9 @@ class AccumuloTools(val attributeStore: AccumuloAttributeStore) extends Attribut
 
   def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): List[(Option[LayerId], T)] = {
     fetch(layerId, attributeName)
-      .map { s => layerId -> s.toString.parseJson.convertTo[T] }
+      .map { s => layerId -> s.toString.parseJson.convertTo[(LayerId, T)]._2 }
       .toList
   }
+
+  def layerMove(layerName: String, args: TransformArgs): Unit = genericLayerMove[AccumuloLayerHeader](layerName, args)
 }

@@ -1,10 +1,9 @@
 package geotrellis.migration.core.backend
 
-import geotrellis.migration.core.AttributeStoreTools
+import geotrellis.migration.core.{AttributeStoreTools, TransformArgs}
 import geotrellis.spark._
 import geotrellis.spark.io._
 import geotrellis.spark.io.hadoop._
-
 import org.apache.hadoop.fs.Path
 import spray.json.DefaultJsonProtocol._
 import spray.json._
@@ -45,4 +44,6 @@ class HadoopTools(val attributeStore: HadoopAttributeStore) extends AttributeSto
         }
       }
   }
+
+  def layerMove(layerName: String, args: TransformArgs): Unit = genericLayerMove[HadoopLayerHeader](layerName, args)
 }
