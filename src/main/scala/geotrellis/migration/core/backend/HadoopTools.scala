@@ -10,6 +10,7 @@ import spray.json.DefaultJsonProtocol._
 import spray.json._
 
 class HadoopTools(val attributeStore: HadoopAttributeStore) extends AttributeStoreTools {
+  val format = "hadoop"
   lazy val layerIds = attributeStore.layerIds
 
   def readFile[T: JsonFormat](path: Path): Option[(LayerId, T)] = {

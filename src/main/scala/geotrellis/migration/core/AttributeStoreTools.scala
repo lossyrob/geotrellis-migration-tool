@@ -13,6 +13,7 @@ import scala.reflect.ClassTag
 trait AttributeStoreTools {
   val attributeStore: AttributeStore
   val layerIds: Seq[LayerId]
+  val format: String
 
   def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): Map[LayerId, T]
 
@@ -32,5 +33,8 @@ trait AttributeStoreTools {
   }
 
   def genericMove(layerName: String, args: TransformArgs): Unit =
-    args.temporalResolution.fold(move[SpatialKey](layerName, args))(_ => move[SpaceTimeKey](layerName, args))
+    args
+      .copy(format = this.format)
+      .temporalResolution
+      .fold(move[SpatialKey](layerName, args))(_ => move[SpaceTimeKey](layerName, args))
 }

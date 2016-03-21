@@ -11,6 +11,7 @@ import spray.json._
 import java.io.FileFilter
 
 class FileTools(val attributeStore: FileAttributeStore) extends AttributeStoreTools {
+  val format = "file"
   lazy val layerIds = attributeStore.layerIds
 
   def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): Map[LayerId, T] = {

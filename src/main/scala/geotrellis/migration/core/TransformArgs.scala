@@ -1,3 +1,3 @@
 package geotrellis.migration.core
 
-case class TransformArgs(format: String, typeName: String, xResolution: Int, yResolution: Int, temporalResolution: Option[Long] = None)
+case class TransformArgs(typeName: String, xResolution: Int = 0, yResolution: Int = 0, format: String = "", temporalResolution: Option[Long] = None)

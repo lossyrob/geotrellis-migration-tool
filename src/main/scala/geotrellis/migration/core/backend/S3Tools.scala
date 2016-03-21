@@ -14,6 +14,7 @@ import scala.io.Source
 import java.nio.charset.Charset
 
 class S3Tools(val attributeStore: S3AttributeStore) extends AttributeStoreTools {
+  val format = "s3"
   lazy val layerIds = attributeStore.layerIds
 
   def layerPath(id: LayerId): String =

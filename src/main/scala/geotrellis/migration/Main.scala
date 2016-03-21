@@ -6,5 +6,5 @@ import geotrellis.spark.io.accumulo.{AccumuloAttributeStore, AccumuloInstance}
 import org.apache.accumulo.core.client.security.tokens.PasswordToken
 
 object Main extends App {
-  // to be implemented
+  
 }

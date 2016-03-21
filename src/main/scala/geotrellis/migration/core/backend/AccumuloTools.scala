@@ -14,6 +14,7 @@ import spray.json.DefaultJsonProtocol._
 import scala.collection.JavaConversions._
 
 class AccumuloTools(val attributeStore: AccumuloAttributeStore) extends AttributeStoreTools {
+  val format = "accumulo"
   lazy val layerIds = attributeStore.layerIds
 
   private def fetch(layerId: Option[LayerId], attributeName: Option[String]): Iterator[Value] = {
