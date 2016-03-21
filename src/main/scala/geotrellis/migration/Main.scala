@@ -6,5 +6,10 @@ import geotrellis.spark.io.accumulo.{AccumuloAttributeStore, AccumuloInstance}
 import org.apache.accumulo.core.client.security.tokens.PasswordToken
 
 object Main extends App {
-  
+  val instance = AccumuloInstance("gis", "zookeeper", "root", new PasswordToken("secret"))
+  val store = new AccumuloAttributeStore(connector = instance.connector, "table")
+  val tools = new AccumuloTools(store)
+  tools.genericMove("BLUE", TransformArgs(
+    typeName = "zorder"
+  ))
 }
