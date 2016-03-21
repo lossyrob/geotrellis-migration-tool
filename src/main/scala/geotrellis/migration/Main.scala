@@ -38,5 +38,6 @@ object Main extends App {
   tools2.layerMove("RED", TransformArgs(
     typeName = "zorder"
   ))
+
   println(store2.readLayerAttributes[HadoopLayerHeader, TileLayerMetadata[SpatialKey], SpatialKey](LayerId("RED", 3)))
 }

@@ -28,7 +28,7 @@ package object core {
     }
   }
 
-  def metadataTransfrom[H: JsonFormat, M: JsonFormat, K: JsonFormat](old: JsValue, args: TransformArgs): (H, M, K, Schema) = {
+  def metadataTransfrom[H: JsonFormat, M: JsonFormat, K: JsonFormat](old: JsValue, args: TransformArgs): (H, M, K, Option[Schema]) = {
     // layer metadata
     val (keyBounds, schema, metadata, header, keyIndex) =
       old
@@ -56,8 +56,8 @@ package object core {
     val newKeyIndex = keyIndexBuild(keyBounds, args).convertTo[K]
 
     (newHeader, newMetadata, newKeyIndex, schema match {
-      case Success(s) => s.convertTo[Schema]
-      case Failure(e) => null: Schema
+      case Success(s) => Some(s.convertTo[Schema])
+      case Failure(e) => Option.empty[Schema]
     })
   }
 }

@@ -23,7 +23,7 @@ trait AttributeStoreTools {
   def delete(layerId: LayerId, attributeName: Option[String]): Unit =
     attributeName.fold(attributeStore.delete(layerId))(attributeStore.delete(layerId, _))
 
-  def loadUpdatedMetadata[H: JsonFormat, M: JsonFormat, K: JsonFormat](layerName: String, args: TransformArgs): List[(LayerId, (H, M, K, Schema))] = {
+  def loadUpdatedMetadata[H: JsonFormat, M: JsonFormat, K: JsonFormat](layerName: String, args: TransformArgs): List[(LayerId, (H, M, K, Option[Schema]))] = {
     layerIds
       .filter(_.name == layerName)
       .flatMap(id => readAll[JsValue](Some(id), Some("metadata")).map { case (k, v) => k.get -> metadataTransfrom[H, M, K](v, args) })
@@ -34,13 +34,13 @@ trait AttributeStoreTools {
     loadUpdatedMetadata[H, TileLayerMetadata[K], KeyIndex[K]](layerName, args).foreach {
       case (id, (header, metadata, keyIndex, schema)) =>
         delete(id, None)
-        if(schema != null) attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, schema)
-        else {
-          if(args.tileType == "multiband")
-            attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, KeyValueRecordCodec[K, MultibandTile].schema)
-          else
-            attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, KeyValueRecordCodec[K, Tile].schema)
-        }
+        schema
+          .fold {
+            args.tileType match {
+              case "multiband" => attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, KeyValueRecordCodec[K, MultibandTile].schema)
+              case _ => attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, KeyValueRecordCodec[K, Tile].schema)
+            }
+          } { attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, _) }
     }
   }
 
