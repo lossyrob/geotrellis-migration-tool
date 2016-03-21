@@ -4,7 +4,7 @@ import geotrellis.migration.core.AttributeStoreTools
 import geotrellis.spark._
 import geotrellis.spark.io._
 import geotrellis.spark.io.accumulo._
-
+import org.apache.accumulo.core.client.BatchWriterConfig
 import org.apache.accumulo.core.data.{Range, Value}
 import org.apache.accumulo.core.security.Authorizations
 import org.apache.hadoop.io.Text
@@ -15,12 +15,19 @@ import scala.collection.JavaConversions._
 
 class AccumuloTools(val attributeStore: AccumuloAttributeStore) extends AttributeStoreTools {
   val format = "accumulo"
-  lazy val layerIds = attributeStore.layerIds
+  val attributeTable = "metadata"
+
+  lazy val layerIds: Seq[LayerId] = {
+    fetch(None, None)
+      .map { _.toString.parseJson.convertTo[(LayerId, Unit)]._1 }
+      .toSeq
+      .distinct
+  }
 
   private def fetch(layerId: Option[LayerId], attributeName: Option[String]): Iterator[Value] = {
-    val scanner = attributeStore.connector.createScanner(attributeStore.attributeTable, new Authorizations())
+    val scanner = attributeStore.connector.createScanner(attributeTable, new Authorizations())
     layerId.foreach { id =>
-      scanner.setRange(new Range(attributeStore.layerIdText(id)))
+      scanner.setRange(new Range(new Text(id.toString)))
     }
     attributeName.foreach { an =>
       scanner.fetchColumnFamily(new Text(an))
@@ -28,9 +35,21 @@ class AccumuloTools(val attributeStore: AccumuloAttributeStore) extends Attribut
     scanner.iterator.map(_.getValue)
   }
 
-  def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): Map[LayerId, T] = {
+  override def delete(layerId: LayerId, attributeName: Option[String]): Unit = {
+    val numThreads = 1
+    val config = new BatchWriterConfig()
+    config.setMaxWriteThreads(numThreads)
+    val deleter = attributeStore.connector.createBatchDeleter(attributeTable, new Authorizations(), numThreads, config)
+    deleter.setRanges(List(new Range(new Text(layerId.toString))))
+    attributeName.foreach { name =>
+      deleter.fetchColumnFamily(new Text(name))
+    }
+    deleter.delete()
+  }
+
+  def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): List[(Option[LayerId], T)] = {
     fetch(layerId, attributeName)
-      .map { _.toString.parseJson.convertTo[(LayerId, T)] }
-      .toMap
+      .map { s => layerId -> s.toString.parseJson.convertTo[T] }
+      .toList
   }
 }

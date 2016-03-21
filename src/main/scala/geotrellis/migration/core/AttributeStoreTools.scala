@@ -15,19 +15,21 @@ trait AttributeStoreTools {
   val layerIds: Seq[LayerId]
   val format: String
 
-  def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): Map[LayerId, T]
+  def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): List[(Option[LayerId], T)]
+
+  def delete(layerId: LayerId, attributeName: Option[String]): Unit = {}
 
   def loadUpdatedMetadata[H: JsonFormat, M: JsonFormat, K: JsonFormat](layerName: String, args: TransformArgs): List[(LayerId, (H, M, K, Schema))] = {
     layerIds
       .filter(_.name == layerName)
-      .flatMap(id => readAll[JsObject](Some(id), None).toList.map { case (k, v) => k -> metadataTransfrom[H, M, K](v, args) })
+      .flatMap(id => readAll[JsValue](Some(id), Some("metadata")).map { case (k, v) => k.get -> metadataTransfrom[H, M, K](v, args) })
       .toList
   }
 
   def move[K: SpatialComponent: JsonFormat: ClassTag](layerName: String, args: TransformArgs): Unit = {
     loadUpdatedMetadata[AccumuloLayerHeader, TileLayerMetadata[K], KeyIndex[K]](layerName, args).foreach {
       case (id, (header, metadata, keyIndex, schema)) =>
-        attributeStore.delete(id)
+        delete(id, None)
         attributeStore.writeLayerAttributes(id, header, metadata, keyIndex, schema)
     }
   }

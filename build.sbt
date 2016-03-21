@@ -30,8 +30,8 @@ libraryDependencies ++= Seq(
   "com.azavea.geotrellis" %% "geotrellis-spark-etl" % "0.10.0-RC2",
   "com.chuusai"           %% "shapeless"            % "2.3.0",
   "com.typesafe"           % "config"               % "1.3.0",
-  "org.apache.spark"      %% "spark-core"           % "1.5.2" % "provided",
-  "org.apache.hadoop"      % "hadoop-client"        % "2.7.1" % "provided",
+  "org.apache.spark"      %% "spark-core"           % "1.5.2",
+  "org.apache.hadoop"      % "hadoop-client"        % "2.7.1",
   "org.scalatest"         %% "scalatest"            % "2.2.0" % "test"
 )
 

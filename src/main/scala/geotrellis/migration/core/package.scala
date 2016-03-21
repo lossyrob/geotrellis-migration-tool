@@ -26,7 +26,7 @@ package object core {
     }
   }
 
-  def metadataTransfrom[H: JsonFormat, M: JsonFormat, K: JsonFormat](old: JsObject, args: TransformArgs): (H, M, K, Schema) = {
+  def metadataTransfrom[H: JsonFormat, M: JsonFormat, K: JsonFormat](old: JsValue, args: TransformArgs): (H, M, K, Schema) = {
     val oldJsArr = old.convertTo[JsArray]
     val oldArr = oldJsArr.elements
     // name and zoom
@@ -57,6 +57,8 @@ package object core {
         .convertTo[M]
 
     val newKeyIndex = keyIndexBuild(keyBounds, args).convertTo[K]
+
+    println(nz)
 
     (newHeader, newMetadata, newKeyIndex, schema.convertTo[Schema])
   }

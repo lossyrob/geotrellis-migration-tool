@@ -28,7 +28,7 @@ class HadoopTools(val attributeStore: HadoopAttributeStore) extends AttributeSto
       }
   }
 
-  def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): Map[LayerId, T] = {
+  def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): List[(Option[LayerId], T)] = {
     val path: Path = (layerId, attributeName) match {
       case (Some(id), None) => attributeStore.layerWildcard(id)
       case (None, Some(attr)) => attributeStore.attributeWildcard(attr)
@@ -40,10 +40,9 @@ class HadoopTools(val attributeStore: HadoopAttributeStore) extends AttributeSto
       .listFiles(path, attributeStore.hadoopConfiguration)
       .map{ path: Path =>
         readFile[T](path) match {
-          case Some(tup) => tup
+          case Some(tup) => { val (id, v) = tup; Some(id) -> v }
           case None => throw new LayerIOError(s"Unable to list $attributeName attributes from $path")
         }
       }
-      .toMap
   }
 }

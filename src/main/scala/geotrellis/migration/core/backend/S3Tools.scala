@@ -32,8 +32,8 @@ class S3Tools(val attributeStore: S3AttributeStore) extends AttributeStoreTools 
     json.parseJson.convertTo[(LayerId, T)]
   }
 
-  def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): Map[LayerId, T] = {
-    val path: String= (layerId, attributeName) match {
+  def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): List[(Option[LayerId], T)] = {
+    val path: String = (layerId, attributeName) match {
       case (Some(id), None)       => layerPath(id)
       case (None, Some(attr))     => attributeStore.attributePrefix(attr)
       case (Some(id), Some(attr)) => attributeStore.attributePath(id, attr)
@@ -45,12 +45,13 @@ class S3Tools(val attributeStore: S3AttributeStore) extends AttributeStoreTools 
       .listObjectsIterator(attributeStore.bucket, path)
       .map{ os =>
         try {
-          readKey[T](os.getKey)
+          val (id, v) = readKey[T](os.getKey)
+          Some(id) -> v
         } catch {
           case e: AmazonS3Exception =>
             throw new LayerIOError(s"Unable to list $attributeName attributes from ${attributeStore.bucket}/${os.getKey}").initCause(e)
         }
       }
-      .toMap
+      .toList
   }
 }

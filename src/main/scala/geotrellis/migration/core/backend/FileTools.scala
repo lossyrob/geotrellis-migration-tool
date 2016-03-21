@@ -14,7 +14,7 @@ class FileTools(val attributeStore: FileAttributeStore) extends AttributeStoreTo
   val format = "file"
   lazy val layerIds = attributeStore.layerIds
 
-  def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): Map[LayerId, T] = {
+  def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): List[(Option[LayerId], T)] = {
     val filter: FileFilter = (layerId, attributeName) match {
       case (Some(id), None)       => new WildcardFileFilter(s"${id.name}${SEP}${id.zoom}${SEP}*.json")
       case (None, Some(attr))     => new WildcardFileFilter(s"*${SEP}${attr}.json")
@@ -25,6 +25,7 @@ class FileTools(val attributeStore: FileAttributeStore) extends AttributeStoreTo
     attributeStore.attributeDirectory
       .listFiles(filter)
       .map(attributeStore.read[T])
-      .toMap
+      .map { case (id, v) => Some(id) -> v }
+      .toList
   }
 }
