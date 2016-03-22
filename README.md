@@ -1,6 +1,6 @@
 # [GeoTrellis](github.com/geotrellis/geotrellis) migration tool
 
-This tool to provide legacy metadata migration up to RC1 / RC2 [GeoTrellis](github.com/geotrellis/geotrellis) versions.
+Tool to provide legacy metadata migration up to RC1 / RC2 [GeoTrellis](github.com/geotrellis/geotrellis) versions.
 
 ## Build
 
