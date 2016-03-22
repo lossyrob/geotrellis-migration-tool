@@ -9,6 +9,7 @@ import org.apache.avro.Schema
 import spray.json._
 import DefaultJsonProtocol._
 import geotrellis.migration.cli.TransformArgs
+import org.joda.time.DateTime
 
 import scala.util.{Failure, Success, Try}
 
@@ -29,7 +30,6 @@ package object core {
   }
 
   def metadataTransfrom[H: JsonFormat, M: JsonFormat, K: JsonFormat](old: JsValue, args: TransformArgs): (H, M, K, Option[Schema]) = {
-    // layer metadata
     val (keyBounds, schema, metadata, header, keyIndex) =
       old
         .convertTo[JsObject]
@@ -43,6 +43,24 @@ package object core {
            }
         }
 
+    val newKeyBounds = {
+      def temporalModify(js: JsValue): JsObject = {
+        val obj = js.convertTo[JsObject]
+        val fields = obj.fields
+        fields
+          .get("time")
+          .map(s => "instant" -> DateTime.parse(s.convertTo[String]).getMillis.toJson)
+          .fold(obj)(t => obj.copy(fields = (obj.fields + t) - "time"))
+      }
+
+      keyBounds.getFields("minKey", "maxKey") match {
+        case Seq(min, max) => JsObject(
+          "minKey" -> temporalModify(min),
+          "maxKey" -> temporalModify(max)
+        )
+      }
+    }
+
     val newHeader =
       header
         .copy(fields = header.fields + ("format" -> args.format.toJson))
@@ -50,10 +68,10 @@ package object core {
 
     val newMetadata =
       metadata
-        .copy(fields = metadata.fields + ("bounds" -> keyBounds))
+        .copy(fields = metadata.fields + ("bounds" -> newKeyBounds))
         .convertTo[M]
 
-    val newKeyIndex = keyIndexBuild(keyBounds, args).convertTo[K]
+    val newKeyIndex = keyIndexBuild(newKeyBounds, args).convertTo[K]
 
     (newHeader, newMetadata, newKeyIndex, schema match {
       case Success(s) => Some(s.convertTo[Schema])
