@@ -13,10 +13,6 @@ import geotrellis.migration.cli.TransformArgs
 import scala.util.{Failure, Success, Try}
 
 package object core {
-  val indexTypes   = List("zorder", "hilbert", "rowmajor")
-  val tileTypes    = List("singleband", "multiband")
-  val backendTypes = List("hadoop", "file", "s3", "accumulo")
-
   // ugly keyIndex build function for in-built types
   def keyIndexBuild(keyBounds: JsObject, args: TransformArgs): JsValue = {
     def kbs = keyBounds.convertTo[KeyBounds[SpatialKey]]
