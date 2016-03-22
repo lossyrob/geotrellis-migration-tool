@@ -47,7 +47,7 @@ sourceGenerators in Compile <+= (sourceManaged in Compile, version, name) map { 
   Seq(file)
 }
 
-//test in assembly := {}
+test in assembly := {}
 
 assemblyMergeStrategy in assembly := {
   case "reference.conf" => MergeStrategy.concat
