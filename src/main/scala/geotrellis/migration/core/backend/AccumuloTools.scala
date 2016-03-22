@@ -1,11 +1,12 @@
 package geotrellis.migration.core.backend
 
-import geotrellis.migration.core.{AttributeStoreTools, TransformArgs}
+import geotrellis.migration.cli.{AccumuloArgs, TransformArgs}
+import geotrellis.migration.core.AttributeStoreTools
 import geotrellis.spark._
 import geotrellis.spark.io._
 import geotrellis.spark.io.accumulo._
-
 import org.apache.accumulo.core.client.BatchWriterConfig
+import org.apache.accumulo.core.client.security.tokens.PasswordToken
 import org.apache.accumulo.core.data.{Range, Value}
 import org.apache.accumulo.core.security.Authorizations
 import org.apache.hadoop.io.Text
@@ -16,7 +17,6 @@ import scala.collection.JavaConversions._
 
 class AccumuloTools(val attributeStore: AccumuloAttributeStore) extends AttributeStoreTools {
   val format = "accumulo"
-  val attributeTable = "metadata"
 
   lazy val layerIds: Seq[LayerId] = {
     fetch(None, None)
@@ -26,7 +26,7 @@ class AccumuloTools(val attributeStore: AccumuloAttributeStore) extends Attribut
   }
 
   private def fetch(layerId: Option[LayerId], attributeName: Option[String]): Iterator[Value] = {
-    val scanner = attributeStore.connector.createScanner(attributeTable, new Authorizations())
+    val scanner = attributeStore.connector.createScanner(attributeStore.attributeTable, new Authorizations())
     layerId.foreach { id =>
       scanner.setRange(new Range(new Text(id.toString)))
     }
@@ -40,7 +40,7 @@ class AccumuloTools(val attributeStore: AccumuloAttributeStore) extends Attribut
     val numThreads = 1
     val config = new BatchWriterConfig()
     config.setMaxWriteThreads(numThreads)
-    val deleter = attributeStore.connector.createBatchDeleter(attributeTable, new Authorizations(), numThreads, config)
+    val deleter = attributeStore.connector.createBatchDeleter(attributeStore.attributeTable, new Authorizations(), numThreads, config)
     deleter.setRanges(List(new Range(new Text(layerId.toString))))
     attributeName.foreach { name =>
       deleter.fetchColumnFamily(new Text(name))
@@ -55,4 +55,12 @@ class AccumuloTools(val attributeStore: AccumuloAttributeStore) extends Attribut
   }
 
   def layerMove(layerName: String, args: TransformArgs): Unit = genericLayerMove[AccumuloLayerHeader](layerName, args)
+}
+
+object AccumuloTools {
+  def apply(args: AccumuloArgs) = {
+    val instance = AccumuloInstance(args.instanceName, args.zookeeper, args.user, args.token)
+    val store = new AccumuloAttributeStore(connector = instance.connector, args.table)
+    new AccumuloTools(store)
+  }
 }

@@ -1,10 +1,10 @@
 package geotrellis.migration.core.backend
 
-import geotrellis.migration.core.{AttributeStoreTools, TransformArgs}
+import geotrellis.migration.cli.{HadoopArgs, TransformArgs}
+import geotrellis.migration.core.AttributeStoreTools
 import geotrellis.spark._
 import geotrellis.spark.io._
 import geotrellis.spark.io.hadoop._
-
 import org.apache.hadoop.fs.Path
 import spray.json.DefaultJsonProtocol._
 import spray.json._
@@ -30,8 +30,8 @@ class HadoopTools(val attributeStore: HadoopAttributeStore) extends AttributeSto
 
   def readAll[T: JsonFormat](layerId: Option[LayerId], attributeName: Option[String]): List[(Option[LayerId], T)] = {
     val path: Path = (layerId, attributeName) match {
-      case (Some(id), None) => attributeStore.layerWildcard(id)
-      case (None, Some(attr)) => attributeStore.attributeWildcard(attr)
+      case (Some(id), None)       => attributeStore.layerWildcard(id)
+      case (None, Some(attr))     => attributeStore.attributeWildcard(attr)
       case (Some(id), Some(attr)) => attributeStore.attributePath(id, attr)
       case _                      => new Path("*.json")
     }
@@ -41,10 +41,19 @@ class HadoopTools(val attributeStore: HadoopAttributeStore) extends AttributeSto
       .map{ path: Path =>
         readFile[T](path) match {
           case Some(tup) => { val (id, v) = tup; Some(id) -> v }
-          case None => throw new LayerIOError(s"Unable to list $attributeName attributes from $path")
+          case None      => throw new LayerIOError(s"Unable to list $attributeName attributes from $path")
         }
       }
   }
 
   def layerMove(layerName: String, args: TransformArgs): Unit = genericLayerMove[HadoopLayerHeader](layerName, args)
+}
+
+object HadoopTools {
+  def apply(args: HadoopArgs) = {
+    val conf = args.getConfiguration
+    HdfsUtils.renamePath(new Path(args.rootPath, "attributes"), new Path(args.rootPath, "_attributes"), conf)
+    val store = new HadoopAttributeStore(args.rootPath, conf)
+    new HadoopTools(store)
+  }
 }

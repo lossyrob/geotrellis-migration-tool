@@ -1,13 +1,14 @@
 package geotrellis.migration.core.backend
 
-import geotrellis.migration.core.{AttributeStoreTools, TransformArgs}
+import geotrellis.migration.core.AttributeStoreTools
 import geotrellis.spark._
 import geotrellis.spark.io.file.{FileAttributeStore, FileLayerHeader}
 import geotrellis.spark.io.file.FileAttributeStore._
-
 import org.apache.commons.io.filefilter.WildcardFileFilter
 import spray.json._
 import java.io.FileFilter
+
+import geotrellis.migration.cli.{FileArgs, TransformArgs}
 
 class FileTools(val attributeStore: FileAttributeStore) extends AttributeStoreTools {
   val format = "file"
@@ -29,4 +30,8 @@ class FileTools(val attributeStore: FileAttributeStore) extends AttributeStoreTo
   }
 
   def layerMove(layerName: String, args: TransformArgs): Unit = genericLayerMove[FileLayerHeader](layerName, args)
+}
+
+object FileTools {
+  def apply(args: FileArgs) = new FileTools(new FileAttributeStore(args.rootPath))
 }

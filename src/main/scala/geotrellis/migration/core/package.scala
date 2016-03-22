@@ -5,20 +5,24 @@ import geotrellis.spark.io._
 import geotrellis.spark.io.index.hilbert.{HilbertSpaceTimeKeyIndex, HilbertSpatialKeyIndex}
 import geotrellis.spark.io.index.rowmajor.RowMajorSpatialKeyIndex
 import geotrellis.spark.io.index.zcurve.{ZSpaceTimeKeyIndex, ZSpatialKeyIndex}
-
 import org.apache.avro.Schema
 import spray.json._
 import DefaultJsonProtocol._
+import geotrellis.migration.cli.TransformArgs
 
 import scala.util.{Failure, Success, Try}
 
 package object core {
+  val indexTypes   = List("zorder", "hilbert", "rowmajor")
+  val tileTypes    = List("singleband", "multiband")
+  val backendTypes = List("hadoop", "file", "s3", "accumulo")
+
   // ugly keyIndex build function for in-built types
   def keyIndexBuild(keyBounds: JsObject, args: TransformArgs): JsValue = {
     def kbs = keyBounds.convertTo[KeyBounds[SpatialKey]]
     def kbt = keyBounds.convertTo[KeyBounds[SpaceTimeKey]]
 
-    (args.typeName, args.temporalResolution) match {
+    (args.indexType, args.temporalResolution) match {
       case ("rowmajor", None)    => new RowMajorSpatialKeyIndex(kbs).toJson
       case ("hilbert", None)     => HilbertSpatialKeyIndex(kbs, args.xResolution, args.yResolution).toJson
       case ("hilbert", Some(tr)) => HilbertSpaceTimeKeyIndex(kbt, args.xResolution, args.yResolution, tr.toInt).toJson

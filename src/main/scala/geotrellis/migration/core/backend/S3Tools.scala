@@ -1,17 +1,18 @@
 package geotrellis.migration.core.backend
 
-import geotrellis.migration.core.{AttributeStoreTools, TransformArgs}
+import geotrellis.migration.core.AttributeStoreTools
 import geotrellis.spark._
 import geotrellis.spark.io._
 import geotrellis.spark.io.s3._
 import geotrellis.spark.io.s3.S3AttributeStore._
-
 import com.amazonaws.services.s3.model.AmazonS3Exception
 import spray.json._
 import DefaultJsonProtocol._
 
 import scala.io.Source
 import java.nio.charset.Charset
+
+import geotrellis.migration.cli.{S3Args, TransformArgs}
 
 class S3Tools(val attributeStore: S3AttributeStore) extends AttributeStoreTools {
   val format = "s3"
@@ -55,4 +56,8 @@ class S3Tools(val attributeStore: S3AttributeStore) extends AttributeStoreTools 
   }
 
   def layerMove(layerName: String, args: TransformArgs): Unit = genericLayerMove[S3LayerHeader](layerName, args)
+}
+
+object S3Tools {
+  def apply(args: S3Args) = new S3Tools(new S3AttributeStore(args.bucket, args.prefix))
 }

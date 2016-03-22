@@ -28,16 +28,24 @@ libraryDependencies ++= Seq(
   "com.azavea.geotrellis" %% "geotrellis-s3"        % "0.10.0-RC2",
   "com.azavea.geotrellis" %% "geotrellis-spark"     % "0.10.0-RC2",
   "com.azavea.geotrellis" %% "geotrellis-spark-etl" % "0.10.0-RC2",
-  "com.chuusai"           %% "shapeless"            % "2.3.0",
-  "com.typesafe"           % "config"               % "1.3.0",
+  "com.github.scopt"      %% "scopt"                % "3.4.0",
   "org.apache.spark"      %% "spark-core"           % "1.5.2",
   "org.apache.hadoop"      % "hadoop-client"        % "2.7.1",
   "org.scalatest"         %% "scalatest"            % "2.2.0" % "test"
 )
 
-addCompilerPlugin("org.spire-math" % "kind-projector" % "0.7.1" cross CrossVersion.binary)
-
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+
+sourceGenerators in Compile <+= (sourceManaged in Compile, version, name) map { (d, v, n) =>
+  val file = d / "geotrellis/migration/cli/Info.scala"
+  IO.write(file, """package geotrellis.migration.cli
+                   |object Info {
+                   |  val version = "%s"
+                   |  val name    = "%s"
+                   |}
+                   |""".stripMargin.format(v, n))
+  Seq(file)
+}
 
 test in assembly := {}
 
