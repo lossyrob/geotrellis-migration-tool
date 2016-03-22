@@ -6,6 +6,7 @@ import geotrellis.spark.io.index.KeyIndex
 import geotrellis.raster.{MultibandTile, Tile}
 import geotrellis.spark.io.avro.AvroRecordCodec
 import geotrellis.spark.io.avro.codecs.KeyValueRecordCodec
+
 import org.apache.avro.Schema
 import spray.json._
 import DefaultJsonProtocol._
