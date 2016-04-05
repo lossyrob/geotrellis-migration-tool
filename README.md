@@ -8,7 +8,7 @@ Tool to provide legacy metadata migration up to RC{N} / Release [GeoTrellis](git
 java -jar ${PWD}/target/scala-2.10/geotrellis-migration-tool-assembly-0.1.0-SNAPSHOT.jar \
      --index-type zorder \
      --tile-type singleband \
-     --backend hadoop \
+     --backend accumulo \
      --istance-name gis \
      --zookeeper localhost \
      --user root \
