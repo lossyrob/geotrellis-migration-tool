@@ -26,7 +26,7 @@ object MainOptions {
 
     opt[String]("backend") action { (x, c) =>
       c &|-> (MainArgs.transformArgs ^|-> TransformArgs.format) set x } validate { x =>
-      if (tileTypes.contains(x)) success
+      if (backendTypes.contains(x)) success
       else failure(s"Option --backend must have one of possible values: ${backendTypes.mkString(", ")}")
     } text s"backend is a String property, available backend types: ${backendTypes.mkString(", ")}"
 
