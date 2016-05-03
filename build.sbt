@@ -23,7 +23,7 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("releases")
 )
 
-val gtVersion = "0.10.0-RC4"
+val gtVersion = "0.10.0"
 
 val geotrellis = Seq(
   "com.azavea.geotrellis" %% "geotrellis-accumulo"  % gtVersion,
@@ -33,10 +33,10 @@ val geotrellis = Seq(
 )
 
 libraryDependencies ++= Seq(
-  "com.github.scopt"      %% "scopt"                % "3.4.0",
-  "org.apache.spark"      %% "spark-core"           % "1.5.2",
-  "org.apache.hadoop"      % "hadoop-client"        % "2.7.1",
-  "org.scalatest"         %% "scalatest"            % "2.2.0" % "test"
+  "com.github.scopt"  %% "scopt"        % "3.4.0",
+  "org.apache.spark"  %% "spark-core"   % "1.5.2",
+  "org.apache.hadoop" % "hadoop-client" % "2.7.1",
+  "org.scalatest"     %% "scalatest"    % "2.2.0" % "test"
 ) ++ geotrellis
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
