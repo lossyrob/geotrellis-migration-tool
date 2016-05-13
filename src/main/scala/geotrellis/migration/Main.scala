@@ -8,10 +8,10 @@ object Main {
     MainOptions.parse(args) match {
       case Some(config) => {
         config.transformArgs.format match {
-          case "accumulo" => AccumuloTools(config.accumuloArgs)
-          case "file" => FileTools(config.fileArgs)
-          case "hadoop" => HadoopTools(config.hadoopArgs)
-          case "s3" => S3Tools(config.s3Args)
+          case "accumulo" => AccumuloTools(config.accumuloArgs).run(config.transformArgs)
+          case "file" => FileTools(config.fileArgs).run(config.transformArgs)
+          case "hadoop" => HadoopTools(config.hadoopArgs).run(config.transformArgs)
+          case "s3" => S3Tools(config.s3Args).run(config.transformArgs)
           case "" => throw new Exception("No backend specified")
           case _ => throw new Exception("Wrong backend specified")
         }

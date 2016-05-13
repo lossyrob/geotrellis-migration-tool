@@ -52,4 +52,6 @@ trait AttributeStoreTools {
       .fold(move[H, SpatialKey](layerName, args))(_ => move[H, SpaceTimeKey](layerName, args))
 
   def layerMove(layerName: String, args: TransformArgs): Unit
+
+  def run(args: TransformArgs) = layerIds.map(_.name).distinct.foreach(layerMove(_, args))
 }

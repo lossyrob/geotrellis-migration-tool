@@ -6,7 +6,6 @@ import geotrellis.spark._
 import geotrellis.spark.io._
 import geotrellis.spark.io.accumulo._
 import org.apache.accumulo.core.client.BatchWriterConfig
-import org.apache.accumulo.core.client.security.tokens.PasswordToken
 import org.apache.accumulo.core.data.{Range, Value}
 import org.apache.accumulo.core.security.Authorizations
 import org.apache.hadoop.io.Text
