@@ -6,13 +6,13 @@ import geotrellis.spark.io.index.KeyIndex
 import geotrellis.raster.{MultibandTile, Tile}
 import geotrellis.spark.io.avro.AvroRecordCodec
 import geotrellis.spark.io.avro.codecs.KeyValueRecordCodec
-
 import org.apache.avro.Schema
 import spray.json._
 import DefaultJsonProtocol._
 import geotrellis.migration.cli.TransformArgs
 
 import scala.reflect.ClassTag
+import scala.util.{Failure, Success, Try}
 
 trait AttributeStoreTools {
   val attributeStore: AttributeStore
@@ -27,8 +27,13 @@ trait AttributeStoreTools {
   def loadUpdatedMetadata[H: JsonFormat, M: JsonFormat, K: JsonFormat](layerName: String, args: TransformArgs): List[(LayerId, (H, M, K, Option[Schema]))] = {
     layerIds
       .filter(_.name == layerName)
-      .flatMap(id => readAll[JsValue](Some(id), Some("metadata")).map { case (k, v) => k.get -> metadataTransfrom[H, M, K](v, args) })
-      .toList
+      .flatMap(id => readAll[JsValue](Some(id), Some("metadata")).map { // skip spatial metadata in case of converting temporal
+        case (k, v) => Try { k.get -> metadataTransfrom[H, M, K](v, args) } match {
+          case Success(s) => Some(s)
+          case Failure(e) => None
+        }
+      })
+      .toList.flatten
   }
 
   def move[H: JsonFormat, K: SpatialComponent: JsonFormat: AvroRecordCodec: ClassTag](layerName: String, args: TransformArgs): Unit = {
