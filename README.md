@@ -5,7 +5,7 @@ Tool to provide legacy metadata migration up to RC{N} / Release [GeoTrellis](git
 ## Run
 
 ```bash
-java -jar ${PWD}/target/scala-2.10/geotrellis-migration-tool-assembly-0.1.0-SNAPSHOT.jar \
+java -jar ${PWD}/target/scala-2.10/geotrellis-migration-tool-assembly-0.1.0.jar \
      --index-type zorder \
      --tile-type singleband \
      --backend accumulo \
@@ -27,7 +27,7 @@ To build you can just run
 ## Args
 
 ```bash
-geotrellis-migration-tool 0.1.0-SNAPSHOT
+geotrellis-migration-tool 0.1.0
 Usage: geotrellis-migration-tool [options]
 
   --index-type <value>

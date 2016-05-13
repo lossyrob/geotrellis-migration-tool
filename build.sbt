@@ -1,5 +1,5 @@
 name := "geotrellis-migration-tool"
-version := "0.1.0-SNAPSHOT"
+version := "0.1.0"
 scalaVersion := "2.10.6"
 crossScalaVersions := Seq("2.11.8", "2.10.6")
 organization := "com.azavea"
