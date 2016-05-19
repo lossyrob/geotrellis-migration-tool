@@ -28,7 +28,7 @@ trait AttributeStoreTools {
     layerIds
       .filter(_.name == layerName)
       .flatMap(id => readAll[JsValue](Some(id), Some("metadata")).map { // skip spatial metadata in case of converting temporal
-        case (k, v) => Try { k.get -> metadataTransfrom[H, M, K](v, args) } match {
+        case (k, v) => Try { k.get -> metadataTransform[H, M, K](v, args) } match {
           case Success(s) => Some(s)
           case Failure(e) => None
         }

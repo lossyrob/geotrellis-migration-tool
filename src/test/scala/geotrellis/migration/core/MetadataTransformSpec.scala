@@ -23,7 +23,7 @@ class MetadataTransformSpec extends FunSpec with Matchers {
   describe("MetadataTransforms") {
     it("should transform old temporal metadata up to new") {
       val (oldJson, newJson) = getJson("/test-temporal-old.json") -> getJson("/test-temporal-new.json")
-      val (hn, mn, kn, sn) = metadataTransfrom[FileLayerHeader, TileLayerMetadata[SpaceTimeKey], KeyIndex[SpaceTimeKey]](oldJson.parseJson, TransformArgs(
+      val (hn, mn, kn, sn) = metadataTransform[FileLayerHeader, TileLayerMetadata[SpaceTimeKey], KeyIndex[SpaceTimeKey]](oldJson.parseJson, TransformArgs(
         indexType = "zorder",
         format    = "file",
         temporalResolution = Some(1000L * 60 * 60 * 365 * 1)
@@ -43,7 +43,7 @@ class MetadataTransformSpec extends FunSpec with Matchers {
 
     it("should transform old spatial metadata up to new") {
       val (oldJson, newJson) = getJson("/test-spatial-old.json") -> getJson("/test-spatial-new.json")
-      val (hn, mn, kn, sn) = metadataTransfrom[FileLayerHeader, TileLayerMetadata[SpatialKey], KeyIndex[SpatialKey]](oldJson.parseJson, TransformArgs(
+      val (hn, mn, kn, sn) = metadataTransform[FileLayerHeader, TileLayerMetadata[SpatialKey], KeyIndex[SpatialKey]](oldJson.parseJson, TransformArgs(
         indexType = "zorder",
         format    = "file"
       ))

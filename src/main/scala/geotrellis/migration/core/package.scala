@@ -29,7 +29,7 @@ package object core {
     }
   }
 
-  def metadataTransfrom[H: JsonFormat, M: JsonFormat, K: JsonFormat](old: JsValue, args: TransformArgs): (H, M, K, Option[Schema]) = {
+  def metadataTransform[H: JsonFormat, M: JsonFormat, K: JsonFormat](old: JsValue, args: TransformArgs): (H, M, K, Option[Schema]) = {
     val (keyBounds, schema, metadata, header, keyIndex) =
       old
         .convertTo[JsObject]
